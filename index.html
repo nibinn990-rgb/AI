@@ -11,73 +11,58 @@
       --panel-2:#2a2a2a;
       --panel-3:#303030;
       --text:#ececec;
-      --muted:#a6a6a6;
+      --muted:#a9a9a9;
       --border:#3a3a3a;
       --accent:#10a37f;
-      --chip:#2b2b2b;
-      --hover:#383838;
+      --user:#2f2f2f;
+      --assistant:#262626;
     }
-
     *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
+    html,body{
       margin:0;
-      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      height:100%;
       background:var(--bg);
       color:var(--text);
-      display:flex;
-      min-height:100vh;
-      overflow:hidden;
+      font-family:Arial, Helvetica, sans-serif;
     }
-
     .app{
       display:flex;
-      width:100%;
       height:100vh;
+      width:100%;
+      overflow:hidden;
     }
-
     .sidebar{
       width:260px;
       background:#171717;
-      border-right:1px solid #2b2b2b;
-      padding:14px;
+      border-right:1px solid #2c2c2c;
+      padding:16px;
       display:flex;
       flex-direction:column;
-      gap:12px;
+      gap:14px;
     }
-
+    .brand{
+      font-size:18px;
+      font-weight:700;
+      letter-spacing:.2px;
+      padding:6px 4px;
+    }
     .new-chat{
-      background:#2a2a2a;
-      border:1px solid var(--border);
+      width:100%;
+      border:none;
+      border-radius:12px;
+      background:var(--panel-3);
       color:var(--text);
       padding:12px 14px;
-      border-radius:12px;
       cursor:pointer;
-      font-size:14px;
       text-align:left;
+      font-size:14px;
     }
-    .new-chat:hover{background:#323232}
-
-    .sidebar-title{
+    .new-chat:hover{background:#3a3a3a}
+    .side-note{
+      margin-top:auto;
       color:var(--muted);
       font-size:12px;
-      text-transform:uppercase;
-      letter-spacing:.08em;
-      margin-top:6px;
-      padding:0 4px;
-    }
-
-    .history-item{
-      padding:10px 12px;
-      border-radius:10px;
-      color:#ddd;
-      font-size:14px;
-      background:transparent;
-      border:1px solid transparent;
-    }
-    .history-item:hover{
-      background:#222;
-      border-color:#2f2f2f;
+      line-height:1.5;
     }
 
     .main{
@@ -88,245 +73,280 @@
       position:relative;
     }
 
-    .topbar{
-      height:56px;
-      display:flex;
-      align-items:center;
-      padding:0 18px;
-      border-bottom:1px solid #2a2a2a;
-      color:#ddd;
-      font-weight:600;
-      background:rgba(33,33,33,.9);
-      backdrop-filter: blur(6px);
-    }
-
-    .chat-wrap{
+    .chat-scroll{
       flex:1;
-      overflow-y:auto;
-      padding:24px 16px 140px;
+      overflow:auto;
+      padding:24px 20px 160px;
     }
 
     .welcome{
-      max-width:840px;
+      max-width:880px;
       margin:12vh auto 0;
       text-align:center;
-      transition:.2s ease;
+      padding:0 20px;
     }
-
     .welcome h1{
       font-size:34px;
-      line-height:1.2;
-      margin:0 0 22px;
+      margin:0 0 18px;
       font-weight:700;
+    }
+    .welcome p{
+      color:var(--muted);
+      margin:0 0 26px;
+      font-size:15px;
     }
 
     .suggestions{
       display:flex;
-      justify-content:center;
       flex-wrap:wrap;
-      gap:10px;
-      max-width:900px;
-      margin:0 auto;
+      gap:12px;
+      justify-content:center;
+      margin-top:14px;
     }
-
-    .chip{
-      background:var(--chip);
+    .pill{
+      background:var(--panel-2);
       border:1px solid var(--border);
-      color:#e9e9e9;
-      padding:12px 16px;
+      color:var(--text);
       border-radius:999px;
-      cursor:pointer;
+      padding:10px 14px;
       font-size:14px;
+      cursor:pointer;
     }
-    .chip:hover{background:var(--hover)}
+    .pill:hover{background:#353535}
 
     .messages{
-      max-width:860px;
+      max-width:900px;
       margin:0 auto;
+      width:100%;
       display:none;
       flex-direction:column;
       gap:18px;
     }
 
-    .message{
+    .msg{
       display:flex;
-      width:100%;
+      gap:12px;
+      align-items:flex-start;
     }
-
-    .message.user{
-      justify-content:flex-end;
+    .avatar{
+      width:34px;
+      height:34px;
+      border-radius:50%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:14px;
+      font-weight:700;
+      flex:0 0 34px;
     }
-
+    .avatar.user{background:#4b4b4b}
+    .avatar.assistant{background:var(--accent); color:white}
     .bubble{
-      max-width:min(80%, 760px);
+      max-width:min(760px, 100%);
       padding:14px 16px;
-      border-radius:18px;
-      line-height:1.5;
-      font-size:15px;
+      border-radius:16px;
+      line-height:1.6;
       white-space:pre-wrap;
       word-wrap:break-word;
+      font-size:15px;
       border:1px solid var(--border);
     }
-
-    .user .bubble{
-      background:#2f2f2f;
-      color:#fff;
-      border-bottom-right-radius:6px;
+    .bubble.user{
+      background:var(--user);
+    }
+    .bubble.assistant{
+      background:var(--assistant);
     }
 
-    .assistant .bubble{
-      background:#1d1d1d;
-      color:#f2f2f2;
-      border-bottom-left-radius:6px;
+    .uploads{
+      max-width:900px;
+      margin:0 auto 14px;
+      width:100%;
+      display:none;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .upload-chip{
+      background:#2d2d2d;
+      border:1px solid #414141;
+      color:#ddd;
+      border-radius:12px;
+      padding:10px 12px;
+      font-size:13px;
     }
 
-    .composer-area{
+    .composer-wrap{
       position:absolute;
       left:0;
       right:0;
       bottom:0;
       padding:18px 16px 20px;
-      background:linear-gradient(to top, rgba(33,33,33,1) 65%, rgba(33,33,33,0));
+      background:linear-gradient(to top, rgba(33,33,33,1) 55%, rgba(33,33,33,0));
     }
 
-    .composer-wrap{
-      max-width:860px;
+    .composer-area{
+      max-width:900px;
       margin:0 auto;
     }
 
-    .uploads{
-      display:none;
-      flex-wrap:wrap;
-      gap:8px;
-      margin-bottom:10px;
-    }
-
-    .upload-tag{
-      background:#2a2a2a;
-      border:1px solid var(--border);
-      color:#ddd;
-      padding:8px 10px;
-      border-radius:10px;
-      font-size:13px;
-    }
-
     .composer{
-      background:var(--panel-2);
-      border:1px solid var(--border);
-      border-radius:26px;
-      padding:10px;
       display:flex;
       align-items:flex-end;
       gap:10px;
-      box-shadow:0 10px 30px rgba(0,0,0,.18);
+      background:#2b2b2b;
+      border:1px solid #3a3a3a;
+      border-radius:26px;
+      padding:10px;
+      box-shadow:0 10px 30px rgba(0,0,0,.22);
     }
 
     .icon-btn{
-      width:40px;
-      height:40px;
-      border-radius:50%;
       border:none;
       background:#3a3a3a;
       color:#fff;
+      width:42px;
+      height:42px;
+      border-radius:50%;
       cursor:pointer;
-      flex:0 0 auto;
       font-size:18px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex:0 0 42px;
     }
     .icon-btn:hover{background:#4a4a4a}
 
-    textarea{
+    .input-wrap{
       flex:1;
-      background:transparent;
-      border:none;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+
+    textarea{
+      width:100%;
       resize:none;
+      border:none;
       outline:none;
+      background:transparent;
       color:var(--text);
       font-size:16px;
       line-height:1.5;
+      min-height:28px;
       max-height:180px;
-      min-height:24px;
       padding:8px 4px;
       font-family:inherit;
     }
-    textarea::placeholder{color:#9c9c9c}
+    textarea::placeholder{
+      color:#b8b8b8;
+    }
 
-    .composer-right{
+    .composer-footer{
       display:flex;
-      gap:8px;
       align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:0 4px 2px;
+    }
+
+    .hint{
+      color:var(--muted);
+      font-size:12px;
     }
 
     .send-btn{
+      border:none;
       background:var(--accent);
+      color:white;
+      min-width:42px;
+      height:42px;
+      border-radius:50%;
+      cursor:pointer;
+      font-size:18px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
     }
-    .send-btn:hover{
-      background:#0e8f70;
+    .send-btn:hover{filter:brightness(1.07)}
+    .send-btn:disabled{
+      opacity:.55;
+      cursor:not-allowed;
     }
 
-    .footnote{
-      text-align:center;
-      color:#8f8f8f;
-      font-size:12px;
-      margin-top:10px;
+    .typing{
+      display:inline-flex;
+      gap:5px;
+      align-items:center;
+      padding:2px 0;
+    }
+    .typing span{
+      width:7px;
+      height:7px;
+      border-radius:50%;
+      background:#bdbdbd;
+      display:inline-block;
+      animation:bounce 1.2s infinite ease-in-out;
+    }
+    .typing span:nth-child(2){animation-delay:.15s}
+    .typing span:nth-child(3){animation-delay:.3s}
+    @keyframes bounce{
+      0%,80%,100%{transform:scale(.7); opacity:.6}
+      40%{transform:scale(1); opacity:1}
     }
 
-    input[type="file"]{
-      display:none;
-    }
-
-    @media (max-width: 900px){
+    @media (max-width: 860px){
       .sidebar{display:none}
       .welcome h1{font-size:28px}
-      .bubble{max-width:90%}
-      .chat-wrap{padding-left:12px;padding-right:12px}
-      .composer-area{padding-left:12px;padding-right:12px}
+      .chat-scroll{padding:18px 12px 160px}
+      .composer-wrap{padding:14px 10px 14px}
+      .bubble{font-size:14px}
     }
   </style>
 </head>
 <body>
   <div class="app">
     <aside class="sidebar">
-      <button class="new-chat" id="newChatBtn">+ New chat</button>
-      <div class="sidebar-title">Recent</div>
-      <div class="history-item">AI website ideas</div>
-      <div class="history-item">Upload image questions</div>
-      <div class="history-item">Video and file chat demo</div>
+      <div class="brand">AI Assistant</div>
+      <button class="new-chat" id="newChatBtn">＋ New chat</button>
+      <div class="side-note">
+        HTML-only demo<br>
+        Auto replies work in your browser.<br>
+        No server required.
+      </div>
     </aside>
 
     <main class="main">
-      <div class="topbar">AI Assistant</div>
-
-      <div class="chat-wrap" id="chatWrap">
+      <div class="chat-scroll" id="chatScroll">
         <section class="welcome" id="welcome">
           <h1>How can I help you today?</h1>
+          <p>Ask a question, upload a file, image, or video, and get a demo AI-style reply.</p>
+
           <div class="suggestions">
-            <button class="chip">Create a website layout</button>
-            <button class="chip">Summarize my uploaded file</button>
-            <button class="chip">Explain this image</button>
-            <button class="chip">Write a product description</button>
+            <button class="pill" data-prompt="Hi">Hi</button>
+            <button class="pill" data-prompt="Write a short welcome message for my website">Write a welcome message</button>
+            <button class="pill" data-prompt="Summarize what kind of files I uploaded">Summarize my uploads</button>
+            <button class="pill" data-prompt="Give me ideas for an AI website homepage">Homepage ideas</button>
           </div>
         </section>
 
-        <section class="messages" id="messages"></section>
+        <div class="uploads" id="uploads"></div>
+        <div class="messages" id="messages"></div>
       </div>
 
-      <div class="composer-area">
-        <div class="composer-wrap">
-          <div class="uploads" id="uploads"></div>
-
+      <div class="composer-wrap">
+        <div class="composer-area">
           <div class="composer">
-            <button class="icon-btn" id="attachBtn" title="Upload file">+</button>
-            <input type="file" id="fileInput" multiple accept="image/*,video/*,.pdf,.doc,.docx,.txt,.csv,.zip" />
+            <button class="icon-btn" id="uploadBtn" title="Upload file">＋</button>
+            <input id="fileInput" type="file" multiple accept="image/*,video/*,.pdf,.doc,.docx,.txt,.csv,.xlsx,.zip" hidden />
 
-            <textarea id="promptInput" rows="1" placeholder="Message AI Assistant"></textarea>
-
-            <div class="composer-right">
-              <button class="icon-btn" title="Voice">🎤</button>
-              <button class="icon-btn send-btn" id="sendBtn" title="Send">➤</button>
+            <div class="input-wrap">
+              <textarea id="promptInput" placeholder="Ask anything..." rows="1"></textarea>
+              <div class="composer-footer">
+                <div class="hint">Press Enter to send · Shift+Enter for new line</div>
+                <button class="send-btn" id="sendBtn" title="Send">➤</button>
+              </div>
             </div>
           </div>
-
-          <div class="footnote">Demo mode: replies are simulated in your browser.</div>
         </div>
       </div>
     </main>
@@ -335,154 +355,203 @@
   <script>
     const welcome = document.getElementById('welcome');
     const messages = document.getElementById('messages');
-    const promptInput = document.getElementById('promptInput');
-    const sendBtn = document.getElementById('sendBtn');
-    const attachBtn = document.getElementById('attachBtn');
-    const fileInput = document.getElementById('fileInput');
     const uploads = document.getElementById('uploads');
-    const chatWrap = document.getElementById('chatWrap');
-    const chips = document.querySelectorAll('.chip');
+    const input = document.getElementById('promptInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const fileInput = document.getElementById('fileInput');
     const newChatBtn = document.getElementById('newChatBtn');
+    const chatScroll = document.getElementById('chatScroll');
 
     let uploadedFiles = [];
 
-    function autoResize(el) {
-      el.style.height = 'auto';
-      el.style.height = Math.min(el.scrollHeight, 180) + 'px';
+    function autoResize() {
+      input.style.height = 'auto';
+      input.style.height = Math.min(input.scrollHeight, 180) + 'px';
     }
 
-    promptInput.addEventListener('input', () => autoResize(promptInput));
+    input.addEventListener('input', autoResize);
 
-    function escapeHtml(text) {
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
+    function scrollToBottom() {
+      requestAnimationFrame(() => {
+        chatScroll.scrollTop = chatScroll.scrollHeight;
+      });
     }
 
-    function addMessage(role, text) {
-      messages.style.display = 'flex';
+    function showConversationUI() {
       welcome.style.display = 'none';
+      messages.style.display = 'flex';
+      if (uploadedFiles.length) uploads.style.display = 'flex';
+    }
 
+    function escapeHtml(str) {
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+
+    function addMessage(role, text, isTyping = false) {
       const row = document.createElement('div');
-      row.className = `message ${role}`;
+      row.className = 'msg';
+
+      const avatar = document.createElement('div');
+      avatar.className = 'avatar ' + role;
+      avatar.textContent = role === 'user' ? 'U' : 'AI';
 
       const bubble = document.createElement('div');
-      bubble.className = 'bubble';
-      bubble.innerHTML = escapeHtml(text);
+      bubble.className = 'bubble ' + role;
 
+      if (isTyping) {
+        bubble.innerHTML = `
+          <div class="typing">
+            <span></span><span></span><span></span>
+          </div>
+        `;
+      } else {
+        bubble.innerHTML = escapeHtml(text);
+      }
+
+      row.appendChild(avatar);
       row.appendChild(bubble);
       messages.appendChild(row);
-      chatWrap.scrollTop = chatWrap.scrollHeight;
+      showConversationUI();
+      scrollToBottom();
+      return { row, bubble };
     }
 
-    function getDemoReply(text) {
-      const q = text.trim().toLowerCase();
-
-      if (!q) return "Please type a message.";
-
-      if (q === "hi" || q === "hello" || q === "hey") {
-        return "Hello! How can I help you today?";
-      }
-
-      if (q.includes("who are you")) {
-        return "I’m a demo AI assistant running fully in HTML, CSS, and JavaScript.";
-      }
-
-      if (q.includes("create website")) {
-        return "Sure — I can help you design an AI website with chat, image upload, video upload, file upload, and question-answer sections.";
-      }
-
-      if (q.includes("image")) {
-        return "You can upload images in this demo. In a real AI version, I could analyze the image and answer questions about it.";
-      }
-
-      if (q.includes("video")) {
-        return "You can attach videos here for demo purposes. A real AI app could summarize or analyze video content with backend processing.";
-      }
-
-      if (q.includes("file") || q.includes("pdf") || q.includes("document")) {
-        return "File upload is enabled in the interface. In a real implementation, the system could extract text and answer questions from the document.";
-      }
-
-      if (q.includes("help")) {
-        return "I can help with chat UI, AI website ideas, uploads, layouts, and demo responses.";
-      }
-
-      return `Demo reply: You asked "${text}". This HTML-only version gives simulated responses. If you want real AI answers, I can build the next version with API integration.`;
-    }
-
-    function sendMessage(customText = null) {
-      const text = customText !== null ? customText : promptInput.value.trim();
-      if (!text && uploadedFiles.length === 0) return;
-
-      let userText = text;
-      if (!userText && uploadedFiles.length > 0) {
-        userText = "Uploaded files";
-      }
-
-      addMessage('user', userText);
-
-      if (uploadedFiles.length > 0) {
-        const fileNames = uploadedFiles.map(f => f.name).join(', ');
-        addMessage('assistant', `I can see these selected files: ${fileNames}. In this demo, files are listed only. Real file analysis would need backend AI processing.`);
-        uploadedFiles = [];
-        uploads.innerHTML = '';
+    function renderUploads() {
+      uploads.innerHTML = '';
+      if (!uploadedFiles.length) {
         uploads.style.display = 'none';
+        return;
       }
+      uploads.style.display = 'flex';
 
-      if (text) {
-        const reply = getDemoReply(text);
-        setTimeout(() => addMessage('assistant', reply), 400);
-      }
-
-      promptInput.value = '';
-      autoResize(promptInput);
+      uploadedFiles.forEach(file => {
+        const chip = document.createElement('div');
+        chip.className = 'upload-chip';
+        chip.textContent = `${file.name} (${formatSize(file.size)})`;
+        uploads.appendChild(chip);
+      });
     }
 
-    sendBtn.addEventListener('click', () => sendMessage());
+    function formatSize(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+      return (bytes / (1024 * 1024 * 1024)).toFixed(1) + ' GB';
+    }
 
-    promptInput.addEventListener('keydown', (e) => {
+    function buildReply(question) {
+      const q = question.trim().toLowerCase();
+
+      if (q === 'hi' || q === 'hello' || q === 'hey') {
+        return 'Hello! How can I help you today? You can ask questions or upload files, images, and videos in this demo.';
+      }
+
+      if (q.includes('who are you')) {
+        return 'I am an HTML-only AI assistant demo. I reply in the browser without a backend server.';
+      }
+
+      if (q.includes('your name')) {
+        return 'You can call me AI Assistant Demo.';
+      }
+
+      if (q.includes('summarize my uploads') || q.includes('summarise my uploads')) {
+        if (!uploadedFiles.length) {
+          return 'You have not uploaded any files yet. Try using the + button to add images, videos, or documents.';
+        }
+        const names = uploadedFiles.map(f => f.name).join(', ');
+        return `You uploaded ${uploadedFiles.length} file(s): ${names}. In this HTML-only version, I can list and reference the uploads, but I do not analyze file contents yet.`;
+      }
+
+      if (q.includes('image')) {
+        return 'This demo supports selecting image files and showing them in the upload list. If you want real image understanding, I can build a version with AI API integration next.';
+      }
+
+      if (q.includes('video')) {
+        return 'This demo can accept video file selection, but it does not process video content. A full version could upload videos and generate summaries with a backend.';
+      }
+
+      if (q.includes('file') || q.includes('pdf') || q.includes('document')) {
+        return 'This HTML demo can display uploaded file names. For real file question-answering, we would add a backend plus document parsing and an AI model.';
+      }
+
+      if (q.includes('website') || q.includes('homepage')) {
+        return 'A good AI website homepage should include a clean hero section, a simple prompt box, upload actions, suggested prompts, trust indicators, and responsive design.';
+      }
+
+      if (q.includes('help')) {
+        return 'I can respond to basic questions, show uploaded files, and simulate an AI chat experience entirely in the browser.';
+      }
+
+      return `Demo reply: You asked, "${question}". This HTML-only setup is working correctly. If you want real AI answers, I can build the next version with API integration.`;
+    }
+
+    function sendMessage(text) {
+      const message = text.trim();
+      if (!message) return;
+
+      addMessage('user', message);
+      input.value = '';
+      autoResize();
+      sendBtn.disabled = true;
+
+      const typing = addMessage('assistant', '', true);
+
+      setTimeout(() => {
+        const reply = buildReply(message);
+        typing.bubble.innerHTML = escapeHtml(reply);
+        sendBtn.disabled = false;
+        scrollToBottom();
+      }, 700);
+    }
+
+    sendBtn.addEventListener('click', () => sendMessage(input.value));
+
+    input.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
-        sendMessage();
+        sendMessage(input.value);
       }
     });
 
-    attachBtn.addEventListener('click', () => fileInput.click());
+    document.querySelectorAll('.pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        sendMessage(btn.dataset.prompt);
+      });
+    });
+
+    uploadBtn.addEventListener('click', () => fileInput.click());
 
     fileInput.addEventListener('change', (e) => {
       const files = Array.from(e.target.files || []);
       if (!files.length) return;
 
       uploadedFiles = uploadedFiles.concat(files);
-      uploads.style.display = 'flex';
+      renderUploads();
+      showConversationUI();
 
-      files.forEach(file => {
-        const tag = document.createElement('div');
-        tag.className = 'upload-tag';
-        tag.textContent = file.name;
-        uploads.appendChild(tag);
-      });
-
+      const names = files.map(f => f.name).join(', ');
+      addMessage('assistant', `Uploaded: ${names}`);
       fileInput.value = '';
-    });
-
-    chips.forEach(chip => {
-      chip.addEventListener('click', () => {
-        sendMessage(chip.textContent);
-      });
     });
 
     newChatBtn.addEventListener('click', () => {
       messages.innerHTML = '';
-      messages.style.display = 'none';
-      welcome.style.display = 'block';
       uploads.innerHTML = '';
-      uploads.style.display = 'none';
       uploadedFiles = [];
-      promptInput.value = '';
-      autoResize(promptInput);
+      messages.style.display = 'none';
+      uploads.style.display = 'none';
+      welcome.style.display = 'block';
+      input.value = '';
+      autoResize();
+      input.focus();
+      scrollToBottom();
     });
+
+    autoResize();
   </script>
 </body>
 </html>
