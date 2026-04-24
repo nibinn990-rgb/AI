@@ -179,12 +179,12 @@ main{position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr;heig
 
     <!-- API Key Section -->
     <div class="apikey-section" id="apikeySection">
-      <div class="apikey-label">🔑 Claude API Key <span class="apikey-hint">saved in your browser only</span></div>
+      <div class="apikey-label">🔑 Gemini API Key <span class="apikey-hint">saved in your browser only</span></div>
       <div class="apikey-row">
-        <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-..." autocomplete="off"/>
+        <input type="password" id="apiKeyInput" placeholder="AIzaSy..." autocomplete="off"/>
         <button id="saveKeyBtn" onclick="saveApiKey()">Save</button>
       </div>
-      <div class="apikey-sub">Get free key → <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a></div>
+      <div class="apikey-sub">Get free key → <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com</a></div>
     </div>
 
     <!-- Upload Zone -->
@@ -282,8 +282,8 @@ let currentTab = 'preview';
 // API Key management
 function saveApiKey() {
   const key = document.getElementById('apiKeyInput').value.trim();
-  if (!key || !key.startsWith('sk-ant-')) {
-    showToast('Invalid API key! Must start with sk-ant-', 'error');
+  if (!key || !key.startsWith('AIza')) {
+    showToast('Invalid API key! Must start with AIza', 'error');
     return;
   }
   localStorage.setItem('claude_api_key', key);
@@ -459,7 +459,7 @@ async function sendPrompt() {
     return;
   }
   if (!getApiKey()) {
-    addMsg('ai', '⚠️ Please enter your Claude API Key first! Get it free at <a href="https://console.anthropic.com" target="_blank" style="color:var(--accent2)">console.anthropic.com</a>');
+    addMsg('ai', '⚠️ Please enter your Gemini API Key first! Get it free at <a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--accent2)">aistudio.google.com</a>');
     return;
   }
 
@@ -493,19 +493,22 @@ RULES:
   const userMessage = `Here is my current portfolio HTML:\n\n${htmlContent}\n${imageContext}\n\nPlease make this change: ${prompt}\n\nReturn the complete updated HTML file only.`;
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const apiKey = getApiKey();
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+    const response = await fetch(geminiUrl, {
       method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'x-api-key': getApiKey(),
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 8000,
-        system: systemPrompt,
-        messages: [{ role: 'user', content: userMessage }]
+        contents: [{
+          parts: [{
+            text: systemPrompt + '\n\n' + userMessage
+          }]
+        }],
+        generationConfig: {
+          maxOutputTokens: 8192,
+          temperature: 0.3
+        }
       })
     });
 
@@ -515,7 +518,7 @@ RULES:
     if (data.error) {
       addMsg('ai', `❌ Error: ${data.error.message}`);
     } else {
-      const result = data.content[0].text;
+      const result = data.candidates[0].content.parts[0].text;
       // Extract HTML if wrapped in code blocks
       let newHtml = result;
       if (result.includes('```html')) {
@@ -535,7 +538,7 @@ RULES:
     }
   } catch (err) {
     removeTyping();
-    addMsg('ai', `❌ Connection error. Please check your internet and try again.`);
+    addMsg('ai', `❌ Connection error: ${err.message}`);
   }
 
   isLoading = false;
@@ -573,6 +576,11 @@ document.getElementById('promptInput').addEventListener('input', function() {
 
 // Check saved API key on load
 checkApiKey();
+// Pre-save Gemini key if not already saved
+if (!getApiKey()) {
+  localStorage.setItem('claude_api_key', 'AIzaSyA7ByHhM83tTFHg-kA8VUY85oJ-DNSy5mc');
+  checkApiKey();
+}
 </script>
 </body>
 </html>
