@@ -492,9 +492,13 @@ RULES:
 
   const userMessage = `Here is my current portfolio HTML:\n\n${htmlContent}\n${imageContext}\n\nPlease make this change: ${prompt}\n\nReturn the complete updated HTML file only.`;
 
+  // Strip base64 images from content sent to API to reduce token size
+  const htmlForApi = htmlContent.replace(/src="data:image\/[^;]+;base64,[^"]{100,}"/g, 'src="KEEP_ORIGINAL_IMAGE"');
+  const userMessageCompressed = `Here is my current portfolio HTML (base64 images replaced with placeholder - keep them as-is in output):\n\n${htmlForApi}\n${imageContext}\n\nPlease make this change: ${prompt}\n\nIMPORTANT: Return the complete updated HTML. Where you see src="KEEP_ORIGINAL_IMAGE", replace it back with the original base64 image data from the input. Return full HTML only.`;
+
   try {
     const apiKey = getApiKey();
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
     const response = await fetch(geminiUrl, {
       method: 'POST',
@@ -502,7 +506,7 @@ RULES:
       body: JSON.stringify({
         contents: [{
           parts: [{
-            text: systemPrompt + '\n\n' + userMessage
+            text: systemPrompt + '\n\n' + userMessageCompressed
           }]
         }],
         generationConfig: {
@@ -519,7 +523,6 @@ RULES:
       addMsg('ai', `❌ Error: ${data.error.message}`);
     } else {
       const result = data.candidates[0].content.parts[0].text;
-      // Extract HTML if wrapped in code blocks
       let newHtml = result;
       if (result.includes('```html')) {
         newHtml = result.split('```html')[1].split('```')[0].trim();
@@ -527,13 +530,23 @@ RULES:
         newHtml = result.split('```')[1].split('```')[0].trim();
       }
 
+      // Restore original base64 images
+      const base64Images = [];
+      htmlContent.replace(/src="(data:image\/[^;]+;base64,[^"]+)"/g, (match, p1) => {
+        base64Images.push(p1);
+      });
+      let imgIndex = 0;
+      newHtml = newHtml.replace(/src="KEEP_ORIGINAL_IMAGE"/g, () => {
+        return `src="${base64Images[imgIndex++] || ''}"`;
+      });
+
       if (newHtml.includes('<!DOCTYPE') || newHtml.includes('<html')) {
         htmlContent = newHtml;
         updatePreview();
-        addMsg('ai', `✅ Done! I've updated your portfolio.<br><br>📥 Click <strong>Download</strong> to save the file, then upload to GitHub!`);
+        addMsg('ai', `✅ Done! Portfolio updated!<br><br>📥 Click <strong>Download</strong> to save, then upload to GitHub!`);
         showToast('Portfolio updated!', 'success');
       } else {
-        addMsg('ai', `⚠️ Something went wrong. Please try again with a clearer instruction.`);
+        addMsg('ai', `⚠️ Something went wrong. Please try again.`);
       }
     }
   } catch (err) {
