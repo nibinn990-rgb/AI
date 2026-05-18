@@ -3,555 +3,142 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI Assistant Demo</title>
+  <title>AI Assistant</title>
   <style>
-    :root{
-      --bg:#212121;
-      --panel:#171717;
-      --panel-2:#2a2a2a;
-      --panel-3:#303030;
-      --text:#ececec;
-      --muted:#a9a9a9;
-      --border:#3a3a3a;
-      --accent:#10a37f;
-      --user:#2f2f2f;
-      --assistant:#262626;
-    }
-    *{box-sizing:border-box}
-    html,body{
-      margin:0;
-      height:100%;
-      background:var(--bg);
-      color:var(--text);
-      font-family:Arial, Helvetica, sans-serif;
-    }
-    .app{
-      display:flex;
-      height:100vh;
-      width:100%;
-      overflow:hidden;
-    }
-    .sidebar{
-      width:260px;
-      background:#171717;
-      border-right:1px solid #2c2c2c;
-      padding:16px;
-      display:flex;
-      flex-direction:column;
-      gap:14px;
-    }
-    .brand{
-      font-size:18px;
-      font-weight:700;
-      letter-spacing:.2px;
-      padding:6px 4px;
-    }
-    .new-chat{
-      width:100%;
-      border:none;
-      border-radius:12px;
-      background:var(--panel-3);
-      color:var(--text);
-      padding:12px 14px;
-      cursor:pointer;
-      text-align:left;
-      font-size:14px;
-    }
+    :root{--bg:#212121;--panel:#171717;--panel-2:#2a2a2a;--panel-3:#303030;--text:#ececec;--muted:#a9a9a9;--border:#3a3a3a;--accent:#10a37f;}
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;}
+    .app{display:flex;height:100vh;width:100%;overflow:hidden;}
+    .sidebar{width:260px;background:var(--panel);border-right:1px solid #2c2c2c;padding:16px;display:flex;flex-direction:column;gap:14px;}
+    .brand{font-size:18px;font-weight:700;padding:6px 4px;}
+    .new-chat{width:100%;border:none;border-radius:12px;background:var(--panel-3);color:var(--text);padding:12px 14px;cursor:pointer;text-align:left;font-size:14px;}
     .new-chat:hover{background:#3a3a3a}
-    .side-note{
-      margin-top:auto;
-      color:var(--muted);
-      font-size:12px;
-      line-height:1.5;
-    }
-
-    .main{
-      flex:1;
-      display:flex;
-      flex-direction:column;
-      min-width:0;
-      position:relative;
-    }
-
-    .chat-scroll{
-      flex:1;
-      overflow:auto;
-      padding:24px 20px 160px;
-    }
-
-    .welcome{
-      max-width:880px;
-      margin:12vh auto 0;
-      text-align:center;
-      padding:0 20px;
-    }
-    .welcome h1{
-      font-size:34px;
-      margin:0 0 18px;
-      font-weight:700;
-    }
-    .welcome p{
-      color:var(--muted);
-      margin:0 0 26px;
-      font-size:15px;
-    }
-
-    .suggestions{
-      display:flex;
-      flex-wrap:wrap;
-      gap:12px;
-      justify-content:center;
-      margin-top:14px;
-    }
-    .pill{
-      background:var(--panel-2);
-      border:1px solid var(--border);
-      color:var(--text);
-      border-radius:999px;
-      padding:10px 14px;
-      font-size:14px;
-      cursor:pointer;
-    }
+    .side-note{margin-top:auto;color:var(--muted);font-size:12px;line-height:1.6;}
+    .main{flex:1;display:flex;flex-direction:column;min-width:0;position:relative;}
+    .chat-scroll{flex:1;overflow:auto;padding:24px 20px 160px;}
+    .welcome{max-width:880px;margin:12vh auto 0;text-align:center;padding:0 20px;}
+    .welcome h1{font-size:34px;margin:0 0 18px;font-weight:700;}
+    .welcome p{color:var(--muted);margin:0 0 26px;font-size:15px;}
+    .suggestions{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:14px;}
+    .pill{background:var(--panel-2);border:1px solid var(--border);color:var(--text);border-radius:999px;padding:10px 14px;font-size:14px;cursor:pointer;}
     .pill:hover{background:#353535}
-
-    .messages{
-      max-width:900px;
-      margin:0 auto;
-      width:100%;
-      display:none;
-      flex-direction:column;
-      gap:18px;
-    }
-
-    .msg{
-      display:flex;
-      gap:12px;
-      align-items:flex-start;
-    }
-    .avatar{
-      width:34px;
-      height:34px;
-      border-radius:50%;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:14px;
-      font-weight:700;
-      flex:0 0 34px;
-    }
+    .messages{max-width:900px;margin:0 auto;width:100%;display:none;flex-direction:column;gap:18px;}
+    .msg{display:flex;gap:12px;align-items:flex-start;}
+    .avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex:0 0 34px;}
     .avatar.user{background:#4b4b4b}
-    .avatar.assistant{background:var(--accent); color:white}
-    .bubble{
-      max-width:min(760px, 100%);
-      padding:14px 16px;
-      border-radius:16px;
-      line-height:1.6;
-      white-space:pre-wrap;
-      word-wrap:break-word;
-      font-size:15px;
-      border:1px solid var(--border);
-    }
-    .bubble.user{
-      background:var(--user);
-    }
-    .bubble.assistant{
-      background:var(--assistant);
-    }
-
-    .uploads{
-      max-width:900px;
-      margin:0 auto 14px;
-      width:100%;
-      display:none;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-    .upload-chip{
-      background:#2d2d2d;
-      border:1px solid #414141;
-      color:#ddd;
-      border-radius:12px;
-      padding:10px 12px;
-      font-size:13px;
-    }
-
-    .composer-wrap{
-      position:absolute;
-      left:0;
-      right:0;
-      bottom:0;
-      padding:18px 16px 20px;
-      background:linear-gradient(to top, rgba(33,33,33,1) 55%, rgba(33,33,33,0));
-    }
-
-    .composer-area{
-      max-width:900px;
-      margin:0 auto;
-    }
-
-    .composer{
-      display:flex;
-      align-items:flex-end;
-      gap:10px;
-      background:#2b2b2b;
-      border:1px solid #3a3a3a;
-      border-radius:26px;
-      padding:10px;
-      box-shadow:0 10px 30px rgba(0,0,0,.22);
-    }
-
-    .icon-btn{
-      border:none;
-      background:#3a3a3a;
-      color:#fff;
-      width:42px;
-      height:42px;
-      border-radius:50%;
-      cursor:pointer;
-      font-size:18px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      flex:0 0 42px;
-    }
-    .icon-btn:hover{background:#4a4a4a}
-
-    .input-wrap{
-      flex:1;
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-    }
-
-    textarea{
-      width:100%;
-      resize:none;
-      border:none;
-      outline:none;
-      background:transparent;
-      color:var(--text);
-      font-size:16px;
-      line-height:1.5;
-      min-height:28px;
-      max-height:180px;
-      padding:8px 4px;
-      font-family:inherit;
-    }
-    textarea::placeholder{
-      color:#b8b8b8;
-    }
-
-    .composer-footer{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      padding:0 4px 2px;
-    }
-
-    .hint{
-      color:var(--muted);
-      font-size:12px;
-    }
-
-    .send-btn{
-      border:none;
-      background:var(--accent);
-      color:white;
-      min-width:42px;
-      height:42px;
-      border-radius:50%;
-      cursor:pointer;
-      font-size:18px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-    }
+    .avatar.assistant{background:var(--accent);color:white}
+    .bubble{max-width:min(760px,100%);padding:14px 16px;border-radius:16px;line-height:1.6;word-wrap:break-word;font-size:15px;border:1px solid var(--border);}
+    .bubble.user{background:#2f2f2f;}
+    .bubble.assistant{background:#262626;white-space:pre-wrap;}
+    .bubble.assistant code{background:#1a1a1a;padding:2px 6px;border-radius:4px;font-family:monospace;font-size:13px;color:#e2b96a;}
+    .bubble.assistant pre{background:#1a1a1a;padding:12px 14px;border-radius:10px;overflow-x:auto;margin:8px 0;border:1px solid #333;}
+    .bubble.assistant pre code{background:none;padding:0;color:#ccc;font-size:13px;}
+    .composer-wrap{position:absolute;left:0;right:0;bottom:0;padding:18px 16px 20px;background:linear-gradient(to top,rgba(33,33,33,1) 55%,rgba(33,33,33,0));}
+    .composer-area{max-width:900px;margin:0 auto;}
+    .composer{display:flex;align-items:flex-end;gap:10px;background:#2b2b2b;border:1px solid #3a3a3a;border-radius:26px;padding:10px;box-shadow:0 10px 30px rgba(0,0,0,.22);}
+    .input-wrap{flex:1;display:flex;flex-direction:column;gap:8px;}
+    textarea{width:100%;resize:none;border:none;outline:none;background:transparent;color:var(--text);font-size:16px;line-height:1.5;min-height:28px;max-height:180px;padding:8px 4px;font-family:inherit;}
+    textarea::placeholder{color:#b8b8b8;}
+    .composer-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 4px 2px;}
+    .hint{color:var(--muted);font-size:12px;}
+    .send-btn{border:none;background:var(--accent);color:white;min-width:42px;height:42px;border-radius:50%;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;}
     .send-btn:hover{filter:brightness(1.07)}
-    .send-btn:disabled{
-      opacity:.55;
-      cursor:not-allowed;
-    }
-
-    .typing{
-      display:inline-flex;
-      gap:5px;
-      align-items:center;
-      padding:2px 0;
-    }
-    .typing span{
-      width:7px;
-      height:7px;
-      border-radius:50%;
-      background:#bdbdbd;
-      display:inline-block;
-      animation:bounce 1.2s infinite ease-in-out;
-    }
+    .send-btn:disabled{opacity:.55;cursor:not-allowed;}
+    .typing{display:inline-flex;gap:5px;align-items:center;padding:2px 0;}
+    .typing span{width:7px;height:7px;border-radius:50%;background:#bdbdbd;display:inline-block;animation:bounce 1.2s infinite ease-in-out;}
     .typing span:nth-child(2){animation-delay:.15s}
     .typing span:nth-child(3){animation-delay:.3s}
-    @keyframes bounce{
-      0%,80%,100%{transform:scale(.7); opacity:.6}
-      40%{transform:scale(1); opacity:1}
-    }
-
-    @media (max-width: 860px){
-      .sidebar{display:none}
-      .welcome h1{font-size:28px}
-      .chat-scroll{padding:18px 12px 160px}
-      .composer-wrap{padding:14px 10px 14px}
-      .bubble{font-size:14px}
-    }
+    @keyframes bounce{0%,80%,100%{transform:scale(.7);opacity:.6}40%{transform:scale(1);opacity:1}}
+    .err{color:#e57373;font-size:13px;padding:8px 12px;background:#2a1a1a;border:1px solid #4a2a2a;border-radius:10px;}
+    @media(max-width:860px){.sidebar{display:none}.welcome h1{font-size:28px}.chat-scroll{padding:18px 12px 160px}.composer-wrap{padding:14px 10px 14px}.bubble{font-size:14px}}
   </style>
 </head>
 <body>
-  <div class="app">
-    <aside class="sidebar">
-      <div class="brand">AI Assistant</div>
-      <button class="new-chat" id="newChatBtn">＋ New chat</button>
-      <div class="side-note">
-        HTML-only demo<br>
-        Auto replies work in your browser.<br>
-        No server required.
-      </div>
-    </aside>
-
-    <main class="main">
-      <div class="chat-scroll" id="chatScroll">
-        <section class="welcome" id="welcome">
-          <h1>How can I help you today?</h1>
-          <p>Ask a question, upload a file, image, or video, and get a demo AI-style reply.</p>
-
-          <div class="suggestions">
-            <button class="pill" data-prompt="Hi">Hi</button>
-            <button class="pill" data-prompt="Write a short welcome message for my website">Write a welcome message</button>
-            <button class="pill" data-prompt="Summarize what kind of files I uploaded">Summarize my uploads</button>
-            <button class="pill" data-prompt="Give me ideas for an AI website homepage">Homepage ideas</button>
-          </div>
-        </section>
-
-        <div class="uploads" id="uploads"></div>
-        <div class="messages" id="messages"></div>
-      </div>
-
-      <div class="composer-wrap">
-        <div class="composer-area">
-          <div class="composer">
-            <button class="icon-btn" id="uploadBtn" title="Upload file">＋</button>
-            <input id="fileInput" type="file" multiple accept="image/*,video/*,.pdf,.doc,.docx,.txt,.csv,.xlsx,.zip" hidden />
-
-            <div class="input-wrap">
-              <textarea id="promptInput" placeholder="Ask anything..." rows="1"></textarea>
-              <div class="composer-footer">
-                <div class="hint">Press Enter to send · Shift+Enter for new line</div>
-                <button class="send-btn" id="sendBtn" title="Send">➤</button>
-              </div>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">AI Assistant</div>
+    <button class="new-chat" id="newChatBtn">＋ New chat</button>
+    <div class="side-note">Powered by Claude AI<br>via OpenRouter<br><br>Ask anything — real AI answers!</div>
+  </aside>
+  <main class="main">
+    <div class="chat-scroll" id="chatScroll">
+      <section class="welcome" id="welcome">
+        <h1>How can I help you today?</h1>
+        <p>Real AI answers — ask anything you want.</p>
+        <div class="suggestions">
+          <button class="pill" data-prompt="Hi, what can you help me with?">Say hi</button>
+          <button class="pill" data-prompt="How to create a VLAN in a Cisco switch?">Cisco VLAN</button>
+          <button class="pill" data-prompt="Write a Python script to ping a host">Python ping script</button>
+          <button class="pill" data-prompt="Explain subnetting in simple terms">Subnetting explained</button>
+        </div>
+      </section>
+      <div class="messages" id="messages"></div>
+    </div>
+    <div class="composer-wrap">
+      <div class="composer-area">
+        <div class="composer">
+          <div class="input-wrap">
+            <textarea id="promptInput" placeholder="Ask anything..." rows="1"></textarea>
+            <div class="composer-footer">
+              <div class="hint">Enter to send · Shift+Enter for new line</div>
+              <button class="send-btn" id="sendBtn">&#10148;</button>
             </div>
           </div>
         </div>
       </div>
-    </main>
-  </div>
-
-  <script>
-    const welcome = document.getElementById('welcome');
-    const messages = document.getElementById('messages');
-    const uploads = document.getElementById('uploads');
-    const input = document.getElementById('promptInput');
-    const sendBtn = document.getElementById('sendBtn');
-    const uploadBtn = document.getElementById('uploadBtn');
-    const fileInput = document.getElementById('fileInput');
-    const newChatBtn = document.getElementById('newChatBtn');
-    const chatScroll = document.getElementById('chatScroll');
-
-    let uploadedFiles = [];
-
-    function autoResize() {
-      input.style.height = 'auto';
-      input.style.height = Math.min(input.scrollHeight, 180) + 'px';
-    }
-
-    input.addEventListener('input', autoResize);
-
-    function scrollToBottom() {
-      requestAnimationFrame(() => {
-        chatScroll.scrollTop = chatScroll.scrollHeight;
+    </div>
+  </main>
+</div>
+<script>
+  const OPENROUTER_KEY='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';
+  const welcome=document.getElementById('welcome'),messages=document.getElementById('messages'),input=document.getElementById('promptInput'),sendBtn=document.getElementById('sendBtn'),newChat=document.getElementById('newChatBtn'),scroll=document.getElementById('chatScroll');
+  let history=[];
+  function autoResize(){input.style.height='auto';input.style.height=Math.min(input.scrollHeight,180)+'px';}
+  input.addEventListener('input',autoResize);
+  function scrollBottom(){requestAnimationFrame(()=>{scroll.scrollTop=scroll.scrollHeight;});}
+  function showChat(){welcome.style.display='none';messages.style.display='flex';}
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function renderMd(t){
+    t=t.replace(/```[\w]*\n?([\s\S]*?)```/g,(_,c)=>`<pre><code>${esc(c.trim())}</code></pre>`);
+    t=t.replace(/`([^`]+)`/g,(_,c)=>`<code>${esc(c)}</code>`);
+    t=t.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+    t=t.replace(/\n/g,'<br>');
+    return t;
+  }
+  function addMessage(role,text,typing=false){
+    const row=document.createElement('div');row.className='msg';
+    const av=document.createElement('div');av.className='avatar '+role;av.textContent=role==='user'?'U':'AI';
+    const bbl=document.createElement('div');bbl.className='bubble '+role;
+    if(typing){bbl.innerHTML='<div class="typing"><span></span><span></span><span></span></div>';}
+    else if(role==='assistant'){bbl.innerHTML=renderMd(text);}
+    else{bbl.textContent=text;}
+    row.appendChild(av);row.appendChild(bbl);messages.appendChild(row);showChat();scrollBottom();
+    return bbl;
+  }
+  async function sendMessage(text){
+    const msg=text.trim();if(!msg)return;
+    addMessage('user',msg);input.value='';autoResize();sendBtn.disabled=true;
+    history.push({role:'user',content:msg});
+    const bbl=addMessage('assistant','',true);
+    try{
+      const res=await fetch('https://openrouter.ai/api/v1/chat/completions',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+OPENROUTER_KEY,'HTTP-Referer':window.location.href,'X-Title':'AI Assistant'},
+        body:JSON.stringify({model:'anthropic/claude-haiku-4-5',messages:[{role:'system',content:'You are a helpful AI assistant. Be clear and concise. Use markdown for code blocks.'},...history]})
       });
-    }
-
-    function showConversationUI() {
-      welcome.style.display = 'none';
-      messages.style.display = 'flex';
-      if (uploadedFiles.length) uploads.style.display = 'flex';
-    }
-
-    function escapeHtml(str) {
-      return str
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
-    }
-
-    function addMessage(role, text, isTyping = false) {
-      const row = document.createElement('div');
-      row.className = 'msg';
-
-      const avatar = document.createElement('div');
-      avatar.className = 'avatar ' + role;
-      avatar.textContent = role === 'user' ? 'U' : 'AI';
-
-      const bubble = document.createElement('div');
-      bubble.className = 'bubble ' + role;
-
-      if (isTyping) {
-        bubble.innerHTML = `
-          <div class="typing">
-            <span></span><span></span><span></span>
-          </div>
-        `;
-      } else {
-        bubble.innerHTML = escapeHtml(text);
-      }
-
-      row.appendChild(avatar);
-      row.appendChild(bubble);
-      messages.appendChild(row);
-      showConversationUI();
-      scrollToBottom();
-      return { row, bubble };
-    }
-
-    function renderUploads() {
-      uploads.innerHTML = '';
-      if (!uploadedFiles.length) {
-        uploads.style.display = 'none';
-        return;
-      }
-      uploads.style.display = 'flex';
-
-      uploadedFiles.forEach(file => {
-        const chip = document.createElement('div');
-        chip.className = 'upload-chip';
-        chip.textContent = `${file.name} (${formatSize(file.size)})`;
-        uploads.appendChild(chip);
-      });
-    }
-
-    function formatSize(bytes) {
-      if (bytes < 1024) return bytes + ' B';
-      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-      if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
-      return (bytes / (1024 * 1024 * 1024)).toFixed(1) + ' GB';
-    }
-
-    function buildReply(question) {
-      const q = question.trim().toLowerCase();
-
-      if (q === 'hi' || q === 'hello' || q === 'hey') {
-        return 'Hello! How can I help you today? You can ask questions or upload files, images, and videos in this demo.';
-      }
-
-      if (q.includes('who are you')) {
-        return 'I am an HTML-only AI assistant demo. I reply in the browser without a backend server.';
-      }
-
-      if (q.includes('your name')) {
-        return 'You can call me AI Assistant Demo.';
-      }
-
-      if (q.includes('summarize my uploads') || q.includes('summarise my uploads')) {
-        if (!uploadedFiles.length) {
-          return 'You have not uploaded any files yet. Try using the + button to add images, videos, or documents.';
-        }
-        const names = uploadedFiles.map(f => f.name).join(', ');
-        return `You uploaded ${uploadedFiles.length} file(s): ${names}. In this HTML-only version, I can list and reference the uploads, but I do not analyze file contents yet.`;
-      }
-
-      if (q.includes('image')) {
-        return 'This demo supports selecting image files and showing them in the upload list. If you want real image understanding, I can build a version with AI API integration next.';
-      }
-
-      if (q.includes('video')) {
-        return 'This demo can accept video file selection, but it does not process video content. A full version could upload videos and generate summaries with a backend.';
-      }
-
-      if (q.includes('file') || q.includes('pdf') || q.includes('document')) {
-        return 'This HTML demo can display uploaded file names. For real file question-answering, we would add a backend plus document parsing and an AI model.';
-      }
-
-      if (q.includes('website') || q.includes('homepage')) {
-        return 'A good AI website homepage should include a clean hero section, a simple prompt box, upload actions, suggested prompts, trust indicators, and responsive design.';
-      }
-
-      if (q.includes('help')) {
-        return 'I can respond to basic questions, show uploaded files, and simulate an AI chat experience entirely in the browser.';
-      }
-
-      return `Demo reply: You asked, "${question}". This HTML-only setup is working correctly. If you want real AI answers, I can build the next version with API integration.`;
-    }
-
-    function sendMessage(text) {
-      const message = text.trim();
-      if (!message) return;
-
-      addMessage('user', message);
-      input.value = '';
-      autoResize();
-      sendBtn.disabled = true;
-
-      const typing = addMessage('assistant', '', true);
-
-      setTimeout(() => {
-        const reply = buildReply(message);
-        typing.bubble.innerHTML = escapeHtml(reply);
-        sendBtn.disabled = false;
-        scrollToBottom();
-      }, 700);
-    }
-
-    sendBtn.addEventListener('click', () => sendMessage(input.value));
-
-    input.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        sendMessage(input.value);
-      }
-    });
-
-    document.querySelectorAll('.pill').forEach(btn => {
-      btn.addEventListener('click', () => {
-        sendMessage(btn.dataset.prompt);
-      });
-    });
-
-    uploadBtn.addEventListener('click', () => fileInput.click());
-
-    fileInput.addEventListener('change', (e) => {
-      const files = Array.from(e.target.files || []);
-      if (!files.length) return;
-
-      uploadedFiles = uploadedFiles.concat(files);
-      renderUploads();
-      showConversationUI();
-
-      const names = files.map(f => f.name).join(', ');
-      addMessage('assistant', `Uploaded: ${names}`);
-      fileInput.value = '';
-    });
-
-    newChatBtn.addEventListener('click', () => {
-      messages.innerHTML = '';
-      uploads.innerHTML = '';
-      uploadedFiles = [];
-      messages.style.display = 'none';
-      uploads.style.display = 'none';
-      welcome.style.display = 'block';
-      input.value = '';
-      autoResize();
-      input.focus();
-      scrollToBottom();
-    });
-
-    autoResize();
-  </script>
+      const data=await res.json();
+      if(!res.ok)throw new Error(data?.error?.message||'API error '+res.status);
+      const reply=data.choices?.[0]?.message?.content||'(no response)';
+      history.push({role:'assistant',content:reply});
+      bbl.innerHTML=renderMd(reply);
+    }catch(e){bbl.innerHTML=`<div class="err">Error: ${esc(e.message)}</div>`;}
+    sendBtn.disabled=false;scrollBottom();
+  }
+  sendBtn.addEventListener('click',()=>sendMessage(input.value));
+  input.addEventListener('keydown',(e)=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage(input.value);}});
+  document.querySelectorAll('.pill').forEach(b=>b.addEventListener('click',()=>sendMessage(b.dataset.prompt)));
+  newChat.addEventListener('click',()=>{messages.innerHTML='';history=[];messages.style.display='none';welcome.style.display='block';input.value='';autoResize();input.focus();});
+  autoResize();
+</script>
 </body>
 </html>
