@@ -13,7 +13,17 @@
     .brand{font-size:18px;font-weight:700;padding:6px 4px;}
     .new-chat{width:100%;border:none;border-radius:12px;background:var(--panel-3);color:var(--text);padding:12px 14px;cursor:pointer;text-align:left;font-size:14px;}
     .new-chat:hover{background:#3a3a3a}
+    .key-section{display:flex;flex-direction:column;gap:6px;}
+    .key-label{font-size:11px;color:var(--muted);}
+    .key-row{display:flex;gap:6px;}
+    .key-input{flex:1;background:#1e1e1e;border:1px solid var(--border);border-radius:8px;color:var(--text);padding:7px 9px;font-size:11px;font-family:monospace;outline:none;min-width:0;}
+    .key-input:focus{border-color:#555;}
+    .key-save{border:none;background:var(--accent);color:white;border-radius:8px;padding:7px 10px;cursor:pointer;font-size:11px;white-space:nowrap;}
+    .key-save:hover{filter:brightness(1.1)}
+    .key-status{font-size:11px;color:var(--muted);}
+    .key-status.ok{color:#10a37f;}
     .side-note{margin-top:auto;color:var(--muted);font-size:12px;line-height:1.6;}
+    .side-note a{color:#10a37f;text-decoration:none;}
     .main{flex:1;display:flex;flex-direction:column;min-width:0;position:relative;}
     .chat-scroll{flex:1;overflow:auto;padding:24px 20px 160px;}
     .welcome{max-width:880px;margin:12vh auto 0;text-align:center;padding:0 20px;}
@@ -58,13 +68,25 @@
   <aside class="sidebar">
     <div class="brand">AI Assistant</div>
     <button class="new-chat" id="newChatBtn">＋ New chat</button>
-    <div class="side-note">Powered by Google Gemini<br>Free AI answers!</div>
+    <div class="key-section">
+      <div class="key-label">🔑 Gemini API Key</div>
+      <div class="key-row">
+        <input class="key-input" id="keyInput" type="password" placeholder="AIzaSy..." />
+        <button class="key-save" id="keySave">Save</button>
+      </div>
+      <div class="key-status" id="keyStatus">Enter your key above</div>
+    </div>
+    <div class="side-note">
+      Get free key at<br>
+      <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com</a><br><br>
+      Key saved in your browser only — never shared with anyone.
+    </div>
   </aside>
   <main class="main">
     <div class="chat-scroll" id="chatScroll">
       <section class="welcome" id="welcome">
         <h1>How can I help you today?</h1>
-        <p>Real AI answers — ask anything you want.</p>
+        <p>Add your Gemini API key in the sidebar to start.</p>
         <div class="suggestions">
           <button class="pill" data-prompt="Hi, what can you help me with?">Say hi</button>
           <button class="pill" data-prompt="How to create a VLAN in a Cisco switch?">Cisco VLAN</button>
@@ -90,11 +112,22 @@
   </main>
 </div>
 <script>
-  const GEMINI_KEY='AIzaSyB4cAkEdlcTIBR3wgZWX6-xRSJdau-Py3w';
-  const GEMINI_URL='https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key='+GEMINI_KEY;
-
-  const welcome=document.getElementById('welcome'),messages=document.getElementById('messages'),input=document.getElementById('promptInput'),sendBtn=document.getElementById('sendBtn'),newChat=document.getElementById('newChatBtn'),scroll=document.getElementById('chatScroll');
+  const welcome=document.getElementById('welcome'),messages=document.getElementById('messages'),input=document.getElementById('promptInput'),sendBtn=document.getElementById('sendBtn'),newChatBtn=document.getElementById('newChatBtn'),scroll=document.getElementById('chatScroll');
+  const keyInput=document.getElementById('keyInput'),keySave=document.getElementById('keySave'),keyStatus=document.getElementById('keyStatus');
   let history=[];
+
+  // Load saved key from localStorage
+  const savedKey=localStorage.getItem('gemini_key');
+  if(savedKey){keyInput.value=savedKey;keyStatus.textContent='✓ Key loaded';keyStatus.className='key-status ok';}
+
+  keySave.addEventListener('click',()=>{
+    const k=keyInput.value.trim();
+    if(!k){keyStatus.textContent='Please enter a key';keyStatus.className='key-status';return;}
+    localStorage.setItem('gemini_key',k);
+    keyStatus.textContent='✓ Key saved!';keyStatus.className='key-status ok';
+  });
+
+  function getKey(){return keyInput.value.trim()||localStorage.getItem('gemini_key')||'';}
 
   function autoResize(){input.style.height='auto';input.style.height=Math.min(input.scrollHeight,180)+'px';}
   input.addEventListener('input',autoResize);
@@ -120,11 +153,14 @@
   }
   async function sendMessage(text){
     const msg=text.trim();if(!msg)return;
+    const key=getKey();
+    if(!key){alert('Please enter your Gemini API key in the sidebar first!');return;}
     addMessage('user',msg);input.value='';autoResize();sendBtn.disabled=true;
     history.push({role:'user',parts:[{text:msg}]});
     const bbl=addMessage('assistant','',true);
     try{
-      const res=await fetch(GEMINI_URL,{
+      const url='https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key='+key;
+      const res=await fetch(url,{
         method:'POST',
         headers:{'Content-Type':'application/json'},
         body:JSON.stringify({
@@ -144,7 +180,7 @@
   sendBtn.addEventListener('click',()=>sendMessage(input.value));
   input.addEventListener('keydown',(e)=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage(input.value);}});
   document.querySelectorAll('.pill').forEach(b=>b.addEventListener('click',()=>sendMessage(b.dataset.prompt)));
-  newChat.addEventListener('click',()=>{messages.innerHTML='';history=[];messages.style.display='none';welcome.style.display='block';input.value='';autoResize();input.focus();});
+  newChatBtn.addEventListener('click',()=>{messages.innerHTML='';history=[];messages.style.display='none';welcome.style.display='block';input.value='';autoResize();input.focus();});
   autoResize();
 </script>
 </body>
