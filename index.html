@@ -58,7 +58,7 @@
   <aside class="sidebar">
     <div class="brand">AI Assistant</div>
     <button class="new-chat" id="newChatBtn">＋ New chat</button>
-    <div class="side-note">Powered by Claude AI<br>via OpenRouter<br><br>Ask anything — real AI answers!</div>
+    <div class="side-note">Powered by Google Gemini<br>Free AI answers!</div>
   </aside>
   <main class="main">
     <div class="chat-scroll" id="chatScroll">
@@ -90,9 +90,12 @@
   </main>
 </div>
 <script>
-  const OPENROUTER_KEY='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';
+  const GEMINI_KEY='AIzaSyA7ByHhM83tTFHg-kA8VUY85oJ-DNSy5mc';
+  const GEMINI_URL='https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key='+GEMINI_KEY;
+
   const welcome=document.getElementById('welcome'),messages=document.getElementById('messages'),input=document.getElementById('promptInput'),sendBtn=document.getElementById('sendBtn'),newChat=document.getElementById('newChatBtn'),scroll=document.getElementById('chatScroll');
   let history=[];
+
   function autoResize(){input.style.height='auto';input.style.height=Math.min(input.scrollHeight,180)+'px';}
   input.addEventListener('input',autoResize);
   function scrollBottom(){requestAnimationFrame(()=>{scroll.scrollTop=scroll.scrollHeight;});}
@@ -118,18 +121,22 @@
   async function sendMessage(text){
     const msg=text.trim();if(!msg)return;
     addMessage('user',msg);input.value='';autoResize();sendBtn.disabled=true;
-    history.push({role:'user',content:msg});
+    history.push({role:'user',parts:[{text:msg}]});
     const bbl=addMessage('assistant','',true);
     try{
-      const res=await fetch('https://openrouter.ai/api/v1/chat/completions',{
+      const res=await fetch(GEMINI_URL,{
         method:'POST',
-        headers:{'Content-Type':'application/json','Authorization':'Bearer '+OPENROUTER_KEY,'HTTP-Referer':window.location.href,'X-Title':'AI Assistant'},
-        body:JSON.stringify({model:'deepseek/deepseek-r1:free',max_tokens:500,messages:[{role:'system',content:'You are a helpful AI assistant. Be clear and concise. Use markdown for code blocks.'},...history]})
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          system_instruction:{parts:[{text:'You are a helpful AI assistant. Be clear and concise. Use markdown for code blocks.'}]},
+          contents:history,
+          generationConfig:{maxOutputTokens:800}
+        })
       });
       const data=await res.json();
       if(!res.ok)throw new Error(data?.error?.message||'API error '+res.status);
-      const reply=data.choices?.[0]?.message?.content||'(no response)';
-      history.push({role:'assistant',content:reply});
+      const reply=data.candidates?.[0]?.content?.parts?.[0]?.text||'(no response)';
+      history.push({role:'model',parts:[{text:reply}]});
       bbl.innerHTML=renderMd(reply);
     }catch(e){bbl.innerHTML=`<div class="err">Error: ${esc(e.message)}</div>`;}
     sendBtn.disabled=false;scrollBottom();
