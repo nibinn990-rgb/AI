@@ -124,7 +124,7 @@
       const res=await fetch('https://openrouter.ai/api/v1/chat/completions',{
         method:'POST',
         headers:{'Content-Type':'application/json','Authorization':'Bearer '+OPENROUTER_KEY,'HTTP-Referer':window.location.href,'X-Title':'AI Assistant'},
-        body:JSON.stringify({model:'anthropic/claude-haiku-4-5',messages:[{role:'system',content:'You are a helpful AI assistant. Be clear and concise. Use markdown for code blocks.'},...history]})
+        body:JSON.stringify({model:'anthropic/claude-haiku-4-5',max_tokens:500,messages:[{role:'system',content:'You are a helpful AI assistant. Be clear and concise. Use markdown for code blocks.'},...history]})
       });
       const data=await res.json();
       if(!res.ok)throw new Error(data?.error?.message||'API error '+res.status);
