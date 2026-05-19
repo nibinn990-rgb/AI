@@ -71,7 +71,7 @@
     <div class="key-section">
       <div class="key-label">🔑 Gemini API Key</div>
       <div class="key-row">
-        <input class="key-input" id="keyInput" type="password" placeholder="AIzaSyCcMCo57klUFuX0xlpNn-er3GgDAdLygEg" />
+        <input class="key-input" id="keyInput" type="password" placeholder="Paste key here..." />
         <button class="key-save" id="keySave">Save</button>
       </div>
       <div class="key-status" id="keyStatus">Enter your key above</div>
@@ -79,7 +79,7 @@
     <div class="side-note">
       Get free key at<br>
       <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com</a><br><br>
-      Key saved in your browser only — never shared with anyone.
+      Key saved in your browser only.
     </div>
   </aside>
   <main class="main">
@@ -90,8 +90,8 @@
         <div class="suggestions">
           <button class="pill" data-prompt="Hi, what can you help me with?">Say hi</button>
           <button class="pill" data-prompt="How to create a VLAN in a Cisco switch?">Cisco VLAN</button>
-          <button class="pill" data-prompt="Write a Python script to ping a host">Python ping script</button>
-          <button class="pill" data-prompt="Explain subnetting in simple terms">Subnetting explained</button>
+          <button class="pill" data-prompt="Write a Python script to ping a host">Python ping</button>
+          <button class="pill" data-prompt="Explain subnetting in simple terms">Subnetting</button>
         </div>
       </section>
       <div class="messages" id="messages"></div>
@@ -116,7 +116,6 @@
   const keyInput=document.getElementById('keyInput'),keySave=document.getElementById('keySave'),keyStatus=document.getElementById('keyStatus');
   let history=[];
 
-  // Load saved key from localStorage
   const savedKey=localStorage.getItem('gemini_key');
   if(savedKey){keyInput.value=savedKey;keyStatus.textContent='✓ Key loaded';keyStatus.className='key-status ok';}
 
@@ -128,7 +127,6 @@
   });
 
   function getKey(){return keyInput.value.trim()||localStorage.getItem('gemini_key')||'';}
-
   function autoResize(){input.style.height='auto';input.style.height=Math.min(input.scrollHeight,180)+'px';}
   input.addEventListener('input',autoResize);
   function scrollBottom(){requestAnimationFrame(()=>{scroll.scrollTop=scroll.scrollHeight;});}
@@ -159,10 +157,10 @@
     history.push({role:'user',parts:[{text:msg}]});
     const bbl=addMessage('assistant','',true);
     try{
-      const url='https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+      const url='https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key='+encodeURIComponent(key);
       const res=await fetch(url,{
         method:'POST',
-        headers:{'Content-Type':'application/json','x-goog-api-key':key},
+        headers:{'Content-Type':'application/json'},
         body:JSON.stringify({
           system_instruction:{parts:[{text:'You are a helpful AI assistant. Be clear and concise. Use markdown for code blocks.'}]},
           contents:history,
@@ -174,7 +172,13 @@
       const reply=data.candidates?.[0]?.content?.parts?.[0]?.text||'(no response)';
       history.push({role:'model',parts:[{text:reply}]});
       bbl.innerHTML=renderMd(reply);
-    }catch(e){bbl.innerHTML=`<div class="err">Error: ${esc(e.message)}</div>`;}
+    }catch(e){
+      if(e.message.includes('Failed to fetch')){
+        bbl.innerHTML=`<div class="err">Network error — make sure your Gemini key is valid and try again.</div>`;
+      } else {
+        bbl.innerHTML=`<div class="err">Error: ${esc(e.message)}</div>`;
+      }
+    }
     sendBtn.disabled=false;scrollBottom();
   }
   sendBtn.addEventListener('click',()=>sendMessage(input.value));
