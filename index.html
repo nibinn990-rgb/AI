@@ -103,7 +103,7 @@
             <textarea id="promptInput" placeholder="Ask anything..." rows="1"></textarea>
             <div class="composer-footer">
               <div class="hint">Enter to send · Shift+Enter for new line</div>
-              <button class="send-btn" id="sendBtn">➤</button>
+              <button class="send-btn" id="sendBtn">&#10148;</button>
             </div>
           </div>
         </div>
@@ -124,97 +124,64 @@
     const k=keyInput.value.trim();
     if(!k){keyStatus.textContent='Please enter a key';keyStatus.className='key-status';return;}
     localStorage.setItem('gemini_key',k);
-    keyStatus.textContent='✓ Key saved';
-    keyStatus.className='key-status ok';
+    keyStatus.textContent='✓ Key saved!';keyStatus.className='key-status ok';
   });
 
-  function appendMessage(text, isUser, isError=false) {
-    welcome.style.display = 'none';
-    messages.style.display = 'flex';
-    
-    const msgDiv = document.createElement('div');
-    msgDiv.className = 'msg';
-    
-    const avatar = document.createElement('div');
-    avatar.className = `avatar ${isUser ? 'user' : 'assistant'}`;
-    avatar.textContent = isUser ? 'U' : 'AI';
-    
-    const bubble = document.createElement('div');
-    bubble.className = isError ? 'err' : `bubble ${isUser ? 'user' : 'assistant'}`;
-    bubble.textContent = text;
-    
-    msgDiv.appendChild(avatar);
-    msgDiv.appendChild(bubble);
-    messages.appendChild(msgDiv);
-    scroll.scrollTop = scroll.scrollHeight;
-    return bubble;
+  function getKey(){return keyInput.value.trim()||localStorage.getItem('gemini_key')||'';}
+
+  function autoResize(){input.style.height='auto';input.style.height=Math.min(input.scrollHeight,180)+'px';}
+  input.addEventListener('input',autoResize);
+  function scrollBottom(){requestAnimationFrame(()=>{scroll.scrollTop=scroll.scrollHeight;});}
+  function showChat(){welcome.style.display='none';messages.style.display='flex';}
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function renderMd(t){
+    t=t.replace(/```[\w]*\n?([\s\S]*?)```/g,(_,c)=>`<pre><code>${esc(c.trim())}</code></pre>`);
+    t=t.replace(/`([^`]+)`/g,(_,c)=>`<code>${esc(c)}</code>`);
+    t=t.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+    t=t.replace(/\n/g,'<br>');
+    return t;
   }
-
-  async function handleSend() {
-    const text = input.value.trim();
-    const key = keyInput.value.trim();
-    if (!text) return;
-    if (!key) { alert('Please enter and save your Gemini API Key first.'); return; }
-
-    input.value = '';
-    input.style.height = 'auto';
-    appendMessage(text, true);
-    
-    history.push({ role: 'user', parts: [{ text: text }] });
-
-    const typingBubble = appendMessage('', false);
-    typingBubble.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
-    sendBtn.disabled = true;
-
-    try {
-      const response = await fetch(`https://googleapis.com{key}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: history })
+  function addMessage(role,text,typing=false){
+    const row=document.createElement('div');row.className='msg';
+    const av=document.createElement('div');av.className='avatar '+role;av.textContent=role==='user'?'U':'AI';
+    const bbl=document.createElement('div');bbl.className='bubble '+role;
+    if(typing){bbl.innerHTML='<div class="typing"><span></span><span></span><span></span></div>';}
+    else if(role==='assistant'){bbl.innerHTML=renderMd(text);}
+    else{bbl.textContent=text;}
+    row.appendChild(av);row.appendChild(bbl);messages.appendChild(row);showChat();scrollBottom();
+    return bbl;
+  }
+  async function sendMessage(text){
+    const msg=text.trim();if(!msg)return;
+    const key=getKey();
+    if(!key){alert('Please enter your Gemini API key in the sidebar first!');return;}
+    addMessage('user',msg);input.value='';autoResize();sendBtn.disabled=true;
+    history.push({role:'user',parts:[{text:msg}]});
+    const bbl=addMessage('assistant','',true);
+    try{
+      const url='https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+      const res=await fetch(url,{
+        method:'POST',
+        headers:{'Content-Type':'application/json','x-goog-api-key':key},
+        body:JSON.stringify({
+          system_instruction:{parts:[{text:'You are a helpful AI assistant. Be clear and concise. Use markdown for code blocks.'}]},
+          contents:history,
+          generationConfig:{maxOutputTokens:800}
+        })
       });
-
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error?.message || 'API request failed');
-
-      const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response generated.';
-      typingBubble.textContent = reply;
-      history.push({ role: 'model', parts: [{ text: reply }] });
-    } catch (err) {
-      typingBubble.parentElement.remove();
-      appendMessage(`Error: ${err.message}`, false, true);
-      history.pop(); 
-    } finally {
-      sendBtn.disabled = false;
-      scroll.scrollTop = scroll.scrollHeight;
-    }
+      const data=await res.json();
+      if(!res.ok)throw new Error(data?.error?.message||'API error '+res.status);
+      const reply=data.candidates?.[0]?.content?.parts?.[0]?.text||'(no response)';
+      history.push({role:'model',parts:[{text:reply}]});
+      bbl.innerHTML=renderMd(reply);
+    }catch(e){bbl.innerHTML=`<div class="err">Error: ${esc(e.message)}</div>`;}
+    sendBtn.disabled=false;scrollBottom();
   }
-
-  sendBtn.addEventListener('click', handleSend);
-  input.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  });
-
-  input.addEventListener('input', () => {
-    input.style.height = 'auto';
-    input.style.height = input.scrollHeight + '28px';
-  });
-
-  newChatBtn.addEventListener('click', () => {
-    messages.innerHTML = '';
-    messages.style.display = 'none';
-    welcome.style.display = 'block';
-    history = [];
-  });
-
-  document.querySelectorAll('.pill').forEach(pill => {
-    pill.addEventListener('click', () => {
-      input.value = pill.getAttribute('data-prompt');
-      handleSend();
-    });
-  });
+  sendBtn.addEventListener('click',()=>sendMessage(input.value));
+  input.addEventListener('keydown',(e)=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage(input.value);}});
+  document.querySelectorAll('.pill').forEach(b=>b.addEventListener('click',()=>sendMessage(b.dataset.prompt)));
+  newChatBtn.addEventListener('click',()=>{messages.innerHTML='';history=[];messages.style.display='none';welcome.style.display='block';input.value='';autoResize();input.focus();});
+  autoResize();
 </script>
 </body>
 </html>
